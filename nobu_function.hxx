@@ -3,6 +3,8 @@
 #define NORMAL_DELAY_TIME 400
 #include ".\inc\v_key.h"
 
+#define DIG_STATUS_NO_MP		100
+
 void Nobu_DropItem();
 void Nobu_KeepItem();
 void Nobu_onKeypress(unsigned int uKey, int nTimes);
@@ -14,6 +16,7 @@ void Nobu_MoveCursorUse();
 void Nobu_LeaveGame();
 int Nobu_DetectEscape(int nCount, int nMax);
 int Nobu_ChangeHandEqu();
+int Nobu_Digging(void (*fnDropProc)(), int nMaxLoop);
 
 void Nobu_DropItem() {
 	MRF_Delay(200);
@@ -38,7 +41,7 @@ void Nobu_KeepItem() {
 void Nobu_onKeypress(unsigned int uKey, int nTimes) {
 	while (nTimes > 0) {
 		IOC_onKeypress(uKey);
-		MRF_Delay(65);
+		MRF_Delay(75);
 		nTimes--;
 	}
 }
@@ -53,11 +56,7 @@ void Nobu_PreDropProc() {
 	MRF_Delay(500);
 	IOC_onKeypress(VK_RETURN);
 	MRF_Delay(5000);
-	IOC_onKeypress(VK_ESCAPE);
-	MRF_Delay(1500);
 	// 開始丟東西
-	IOC_onKeypress(VK_F11);
-	MRF_Delay(1000);
 	Nobu_onKeypress('K',3);
 	MRF_Delay(500);
 	IOC_onKeypress(VK_RETURN);
@@ -80,6 +79,12 @@ int Nobu_PostDropProc() {
 		IOC_onKeypress('I');
 		MRF_Delay(NORMAL_DELAY_TIME);	
 	}
+	else if (MRF_MatchPic("nobu_pic\\ProtectItem.bmp", &x, &y, 1024, 768)) {
+		IOC_onKeypress(VK_RETURN);
+		MRF_Delay(NORMAL_DELAY_TIME);
+		IOC_onKeypress('I');
+		MRF_Delay(NORMAL_DELAY_TIME);		
+	}		
 	else if (MRF_MatchPic("nobu_pic\\CanNotDrop.bmp", &x, &y, 1024, 768)) {
 		IOC_onKeypress(VK_RETURN);
 		MRF_Delay(NORMAL_DELAY_TIME+300);
@@ -187,4 +192,80 @@ int Nobu_ChangeHandEqu() {
 	MRF_Delay(500);
 }
 
+void NobuDigProc() {
+	// 選稼業
+	IOC_onKeypress(VK_TAB);
+	MRF_Delay(800);
+	IOC_onKeypress(VK_RETURN);
+	MRF_Delay(1000);
+	// 選採集
+	Nobu_onKeypress('I', 3);
+	MRF_Delay(500);
+	
+	// 選採集技能
+	IOC_onKeypress(VK_RETURN);
+	MRF_Delay(1000);
+	Nobu_onKeypress('I', 1);
+	MRF_Delay(500);
+	
+
+	IOC_onKeypress(VK_RETURN);
+	MRF_Delay(2000);
+	IOC_onKeypress(VK_RETURN);
+	MRF_Delay(1500);
+	
+	// 採10次
+	Nobu_onKeypress('J', 4);
+	MRF_Delay(500);
+	
+	IOC_onKeypress(VK_RETURN);
+	MRF_Delay(3000);	
+	
+	// 採集提示
+	IOC_onKeypress(VK_RETURN);
+	MRF_Delay(1000);
+	
+	// 採完畫面
+	Nobu_onKeypress(VK_RETURN, 4);
+	MRF_Delay(1000);		
+	
+	// 經驗
+	Nobu_onKeypress(VK_RETURN, 4);
+	MRF_Delay(700);			
+}
+
+int detectDigStatus() {
+	int x=0, y=0;
+	if (MRF_MatchPic("nobu_pic\\LessMP.bmp", &x, &y, 900, 600)) {
+		MRF_Delay(NORMAL_DELAY_TIME+5000);
+		IOC_onKeypress(VK_ESCAPE);
+		return DIG_STATUS_NO_MP;
+	}
+}
+
+int Nobu_Digging(void (*fnDropProc)(), int nMaxLoop) {
+	int nCount=0;
+
+	if (fnDropProc == NULL)
+		return -1;
+	
+	for (nCount=1; nCount <= nMaxLoop; nCount++) {
+		if (detectDigStatus() != DIG_STATUS_NO_MP) {
+			MRF_Delay(1800);
+			NobuDigProc();	
+			if ((nCount%5) != 0) {
+				continue;
+			}
+		}
+		MRF_Delay(15000);
+		Nobu_onKeypress(VK_RETURN, 5);
+		Nobu_onKeypress(VK_ESCAPE, 5);
+		Nobu_PreDropProc();
+		fnDropProc();
+		MRF_Delay(10000);
+	}
+	
+	Nobu_LeaveGame();
+	return 0;
+}
 #endif
