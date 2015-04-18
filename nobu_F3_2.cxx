@@ -9,7 +9,6 @@
 #define CHANGE_HAND_LIMIT_TIMES 601
 
 void DropProc() {
-	Nobu_PreDropProc();
 	while (1) {
 		MRF_Delay(NORMAL_DELAY_TIME);
 		IOC_onKeypress(VK_RETURN);

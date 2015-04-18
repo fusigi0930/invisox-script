@@ -7,7 +7,6 @@
 #define KEYHOLD_TIME 30
 
 void DropProc() {
-	Nobu_PreDropProc();
 	while (1) {
 		MRF_Delay(NORMAL_DELAY_TIME);
 		IOC_onKeypress(VK_RETURN);

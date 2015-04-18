@@ -9,7 +9,6 @@
 #define CHANGE_HAND_LIMIT_TIMES 501
 
 void DropProc() {
-	Nobu_PreDropProc();
 	int nKeepItem1=0, nKeepItem2=0, nKeepItem3=0;
 	while (1) {
 		MRF_Delay(NORMAL_DELAY_TIME);
