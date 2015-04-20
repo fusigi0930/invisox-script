@@ -253,7 +253,7 @@ int Nobu_Digging(void (*fnDropProc)(), int nMaxLoop) {
 		if (detectDigStatus() != DIG_STATUS_NO_MP) {
 			MRF_Delay(1800);
 			NobuDigProc();	
-			if ((nCount%5) != 0) {
+			if ((nCount%4) != 0) {
 				continue;
 			}
 		}

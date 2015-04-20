@@ -24,8 +24,7 @@ void DropProc() {
 			Nobu_DropItem();
 		// ¥áº£
         else if (MRF_MatchPic("nobu_pic\\DropItem022.bmp", &x, &y, 1024, 768))
-			//Nobu_DropItem();			
-			continue;
+			Nobu_DropItem();			
 		// ¥á¹p³¾¦Ð¤ò
         else if (MRF_MatchPic("nobu_pic\\DropItem023.bmp", &x, &y, 1024, 768))
 			Nobu_DropItem();
