@@ -7,9 +7,24 @@
 #define NOBU_ITEMS_01_ADDR_HD 0x138603B4//0x13861c1c
 #define NOBU_ITEMS_OFFSET_HD 0xd0
 #define NOBU_ITEMS_00_ADDR_HD (NOBU_ITEMS_01_ADDR_HD - NOBU_ITEMS_OFFSET_HD)
+#define NOBU_ITEMS_PROTECT_HD 0xbf
+#define NOBU_ITEMS_PROTECT_OFFSET_HD 0xa9
 
 #define NOBU_ITEMS_OFFSET_HD_IDX 0x06
 #define NOBU_ITEMS_OFFSET_HD_CNT 0x08
+
+struct SHDNobuItem {
+	union {
+		unsigned char buffer[NOBU_ITEMS_OFFSET_HD];
+		struct item {
+			unsigned char reserve1[NOBU_ITEMS_OFFSET_HD_IDX];
+			unsigned short itemId;
+			unsigned char itemCount;
+			unsigned char reserve2[NOBU_ITEMS_PROTECT_OFFSET_HD];
+			unsigned char protectMode;
+		};
+	};
+};
 
 struct SNobuItem {
 	unsigned long ddItemId;

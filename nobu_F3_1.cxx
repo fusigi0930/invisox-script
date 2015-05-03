@@ -26,36 +26,15 @@ void DropProc() {
 			Nobu_DropItem();	
 		// ¥á¹aÄõ
         else if (MRF_MatchPic("nobu_pic\\DropItem012.bmp", &x, &y, 1024, 768)) {
-/*
-			if (nKeepItem1 > 2)
-				Nobu_DropItem();
-			else {
-				nKeepItem1++;
-				Nobu_KeepItem();
-				continue;
-			}
-*/
 			Nobu_DropItem();
 		}
 		// ¥áÀsÁx
         else if (MRF_MatchPic("nobu_pic\\DropItem026.bmp", &x, &y, 1024, 768)) {
-			if (nKeepItem2 > 1)
-				Nobu_DropItem();
-			else {
-				nKeepItem2++;
-				Nobu_KeepItem();
-				continue;
-			}		
+			Nobu_DropItem();	
 		}
 		// ¥á·¨±ö¥Ö
         else if (MRF_MatchPic("nobu_pic\\DropItem032.bmp", &x, &y, 1024, 768)) {
-			if (nKeepItem3 > 1)
-				Nobu_DropItem();
-			else {
-				nKeepItem3++;
-				Nobu_KeepItem();
-				continue;
-			}		
+			Nobu_DropItem();
 		}
 		else if (Nobu_PostDropProc() == 1)
 			break;
