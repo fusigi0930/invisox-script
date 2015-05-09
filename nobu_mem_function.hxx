@@ -11,18 +11,26 @@
 #define NOBU_ITEMS_PROTECT_OFFSET_HD 0xa9
 
 #define NOBU_ITEMS_OFFSET_HD_IDX 0x06
+#define NOBU_ITEMS_OFFSET_HD_TYPE 0x07
 #define NOBU_ITEMS_OFFSET_HD_CNT 0x08
+
+#define NOBU_ITEMS_TYPE_HD_ITEM 1
+
+#define NOBU_MAX_MP_ADDR_HD 0x1387cae6 // 0x200ea694
+#define NOBU_CUR_MP_ADDR_HD 0x138a93b2 // 0x200ea698
 
 struct SHDNobuItem {
 	union {
 		unsigned char buffer[NOBU_ITEMS_OFFSET_HD];
-		struct item {
-			unsigned char reserve1[NOBU_ITEMS_OFFSET_HD_IDX];
+		struct SItem {
 			unsigned short itemId;
+			unsigned char reserve1[NOBU_ITEMS_OFFSET_HD_IDX-2];
+			unsigned char itemIndex;
+			unsigned char itemType;
 			unsigned char itemCount;
 			unsigned char reserve2[NOBU_ITEMS_PROTECT_OFFSET_HD];
 			unsigned char protectMode;
-		};
+		} item;
 	};
 };
 
@@ -117,6 +125,29 @@ int Nobu_GetItemMem(SNobuItem *ptrItems) {
 	}
 	return nItemIndex-1;
 }
+
+int NobuHD_GetItemMem(SHDNobuItem *ptrItems) {
+	unsigned char ar_chBuf[20480];
+	if (IOC_onReadGameMemory(0, NOBU_ITEMS_01_ADDR_HD, ar_chBuf, sizeof(ar_chBuf)) != 0) {
+		MRF_DebugMsg("get item memor failed\n");
+		return;
+	}
+	
+	// Get the last item
+	SHDNobuItem *ptrCurItem=(SHDNobuItem*) ar_chBuf;
+	MRF_DebugMsg("output the item info\n");
+	while (ptrCurItem->item.itemIndex != 0xff || ptrCurItem->item.itemType != NOBU_ITEMS_TYPE_HD_ITEM) {
+		/*
+		MRF_DebugMsg("item_id: 0x%x, item index: %d, item type: %d, item_num:%d\n", 
+			ptrCurItem->item.itemId, ptrCurItem->item.itemIndex, ptrCurItem->item.itemType, ptrCurItem->item.itemCount);
+		
+		*/
+		ptrCurItem++;
+	}
+	ptrItems=ptrCurItem;
+	return ptrItems->item.itemIndex;
+}
+
 
 int Nobu_MemPostDropProc() {
 	IOC_onKeypress(VK_ESCAPE);

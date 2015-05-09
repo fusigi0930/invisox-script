@@ -56,6 +56,18 @@
 #define NOBU_ITEM_1021		0x146a	// 葛
 #define NOBU_ITEM_1022		0x11b7	// 庭院石
 #define NOBU_ITEM_1023		0x11d1	// 菖蒲插花
+#define NOBU_ITEM_1024		0x342f	// 麻束
+#define NOBU_ITEM_1025		0x3430	// 蘇芳
+#define NOBU_ITEM_1026		0x3431	// 紅松脂
+#define NOBU_ITEM_1027		0x3432	// 亞麻束
+#define NOBU_ITEM_1028		0x3433	// 紫草
+#define NOBU_ITEM_1029		0x3434	// 黑松脂
+#define NOBU_ITEM_1030		0x3736	// 水楢
+#define NOBU_ITEM_1031		0x3737	// 五葉松傘
+#define NOBU_ITEM_1032		0x4986	// 上枸杞
+#define NOBU_ITEM_1033		0x4987	// 上月見草
+#define NOBU_ITEM_1034		0x4988	// 上紅花
+#define NOBU_ITEM_1035		0x4989	// 上薑黃
 
 // 伐木類
 #define NOBU_ITEM_2000		0x09ba	// 白檀
@@ -88,4 +100,10 @@
 #define NOBU_ITEM_3013		0x1462	// 水晶礦 
 #define NOBU_ITEM_3014		0x11b9	// 菱形飛石 
 #define NOBU_ITEM_3015		0x11a2	// 石庭院土台 
+
+// 其他
+#define NOBU_ITEM_9000		0x0223	// 魚糕
+#define NOBU_ITEM_9001		0x0805	// 行李飯
+#define NOBU_ITEM_9002		0x34f6	// 寶玉原石
+#define NOBU_ITEM_9003		0x480e	// 力之源.大	
 #endif //#ifndef __NOBU_ITEMS_TABLE__
