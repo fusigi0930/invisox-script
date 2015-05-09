@@ -16,6 +16,7 @@ void Nobu_MoveCursorUse();
 void Nobu_LeaveGame();
 int Nobu_DetectEscape(int nCount, int nMax);
 int Nobu_ChangeHandEqu();
+void NobuDigProc();
 int Nobu_Digging(void (*fnDropProc)(), int nMaxLoop);
 
 void Nobu_DropItem() {

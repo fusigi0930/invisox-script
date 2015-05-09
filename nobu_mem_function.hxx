@@ -16,7 +16,7 @@
 
 #define NOBU_ITEMS_TYPE_HD_ITEM 1
 
-#define NOBU_MAX_MP_ADDR_HD 0x1387cae6 // 0x200ea694
+#define NOBU_MAX_MP_ADDR_HD 0x138a93a0 // 0x200ea694
 #define NOBU_CUR_MP_ADDR_HD 0x138a93b2 // 0x200ea698
 
 struct SHDNobuItem {
@@ -34,6 +34,11 @@ struct SHDNobuItem {
 	};
 };
 
+struct SHDNobuDrop {
+	unsigned short itemId;
+	int nKeep;
+};
+
 struct SNobuItem {
 	unsigned long ddItemId;
 	unsigned short dwReserver1;
@@ -47,7 +52,8 @@ void Nobu_MemDropProc(fnDropProc dropProc);
 void Nobu_MemDropItem(unsigned char nNum);
 void Nobu_MemKeepItem();
 int Nobu_MemPostDropProc();
-int Nobu_GetItemMem(SNobuItem *ptrItems);
+int Nobu_GetItemMem(SNobuItem *ptrItems, int nLeng);
+int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *), int nMaxLoop);
 
 void Nobu_MemDropItem(unsigned char nNum) {
 	//MRF_DebugMsg("memDropItem drop item\n");
@@ -126,7 +132,7 @@ int Nobu_GetItemMem(SNobuItem *ptrItems) {
 	return nItemIndex-1;
 }
 
-int NobuHD_GetItemMem(SHDNobuItem *ptrItems) {
+int NobuHD_GetItemMem(SHDNobuItem *ptrItems, int nLeng) {
 	unsigned char ar_chBuf[20480];
 	if (IOC_onReadGameMemory(0, NOBU_ITEMS_01_ADDR_HD, ar_chBuf, sizeof(ar_chBuf)) != 0) {
 		MRF_DebugMsg("get item memor failed\n");
@@ -135,21 +141,13 @@ int NobuHD_GetItemMem(SHDNobuItem *ptrItems) {
 	
 	// Get the last item
 	SHDNobuItem *ptrCurItem=(SHDNobuItem*) ar_chBuf;
-	MRF_DebugMsg("output the item info\n");
-	while (ptrCurItem->item.itemIndex != 0xff || ptrCurItem->item.itemType != NOBU_ITEMS_TYPE_HD_ITEM) {
-		/*
-		MRF_DebugMsg("item_id: 0x%x, item index: %d, item type: %d, item_num:%d\n", 
-			ptrCurItem->item.itemId, ptrCurItem->item.itemIndex, ptrCurItem->item.itemType, ptrCurItem->item.itemCount);
-		
-		*/
-		ptrCurItem++;
-	}
-	ptrItems=ptrCurItem;
-	return ptrItems->item.itemIndex;
+	memcpy (ptrItems, ar_chBuf, nLeng);
+	return 0;
 }
 
 
 int Nobu_MemPostDropProc() {
+	MRF_Delay(NORMAL_DELAY_TIME);
 	IOC_onKeypress(VK_ESCAPE);
 	MRF_Delay(NORMAL_DELAY_TIME);
 	IOC_onKeypress('K');
@@ -157,6 +155,84 @@ int Nobu_MemPostDropProc() {
 	IOC_onKeypress(VK_ESCAPE);
 	MRF_Delay(NORMAL_DELAY_TIME+700);		
 	return 0;
+}
+
+int detectHDMemDigStatus() {
+	unsigned char ar_chBuf[256];
+	if (IOC_onReadGameMemory(0, NOBU_MAX_MP_ADDR_HD, ar_chBuf, sizeof(ar_chBuf)) != 0) {
+		MRF_DebugMsg("detect hd memory dig stats get item memory failed\n");
+		return;
+	}
+	
+	unsigned short nMaxMP=*((unsigned short*) (ar_chBuf+(NOBU_MAX_MP_ADDR_HD-NOBU_MAX_MP_ADDR_HD)));
+	unsigned short nCurMP=*((unsigned short*) (ar_chBuf+(NOBU_CUR_MP_ADDR_HD-NOBU_MAX_MP_ADDR_HD)));
+	
+	//MRF_DebugMsg("maxMP: %d, curMP: %d\n", nMaxMP, nCurMP);
+	
+	if (nCurMP < 800) {
+		MRF_Delay(NORMAL_DELAY_TIME+5000);
+		IOC_onKeypress(VK_ESCAPE);
+		return DIG_STATUS_NO_MP;	
+	}
+}
+
+int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) {
+	int nCount=0;
+
+	if (fnHDDropProc == NULL)
+		return -1;
+	
+	for (nCount=1; nCount <= nMaxLoop; nCount++) {
+		if (detectHDMemDigStatus() != DIG_STATUS_NO_MP) {
+			MRF_Delay(1800);
+			NobuDigProc();	
+			if ((nCount%3) != 0) {
+				continue;
+			}
+		}
+		MRF_Delay(15000);
+		Nobu_onKeypress(VK_RETURN, 5);
+		Nobu_onKeypress(VK_ESCAPE, 5);
+		SHDNobuItem items[60]={0};
+		SHDNobuItem *ptrItem=items;
+		Nobu_PreDropProc();
+		NobuHD_GetItemMem(items, sizeof(items));
+		while (ptrItem->item.itemIndex != 0xff) {
+			ptrItem++;
+		}
+		// pass the last item
+		fnHDDropProc(ptrItem-1);
+		MRF_Delay(10000);
+	}
+	
+	Nobu_LeaveGame();
+	return 0;
+}
+
+int Nobu_HDmemDropMainProc(SHDNobuDrop *drops, SHDNobuItem *ptrItem) {
+	while(1) {
+		for (int i=0; drops[i].itemId != 0; i++) {
+			if (ptrItem->item.itemId == drops[i].itemId && 
+				ptrItem->item.itemType == NOBU_ITEMS_TYPE_HD_ITEM && 
+				ptrItem->item.itemCount > 1 &&
+				ptrItem->item.protectMode != NOBU_ITEMS_PROTECT_HD) {
+				IOC_onKeypress(VK_RETURN);
+				MRF_Delay(400);
+				Nobu_DropItem();
+				MRF_Delay(200);
+				IOC_onKeypress('K');
+				MRF_Delay(300);
+				break;
+			}
+		}
+		if (ptrItem->item.itemIndex < 15) {
+			Nobu_MemPostDropProc();
+			break;
+		}
+		Nobu_MemKeepItem();
+		ptrItem--;
+		MRF_Delay(400);
+	}
 }
 
 #endif // __NOBU_ONLINE_MEM_FUNCTION__
