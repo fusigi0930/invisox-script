@@ -112,14 +112,31 @@
 #define NOBU_ITEM_3009		0x05c1	// ÅK¬â 
 #define NOBU_ITEM_3010		0x1465	// ·Æ¥Û 
 #define NOBU_ITEM_3011		0x015b	// ²¸Äq 
-#define NOBU_ITEM_3012		0x00f6	// µv¥Û 
+#define NOBU_ITEM_3012		0x015a	// µv¥Û 
 #define NOBU_ITEM_3013		0x1462	// ¤ô´¹Äq 
 #define NOBU_ITEM_3014		0x11b9	// µÙ§Î­¸¥Û 
 #define NOBU_ITEM_3015		0x11a2	// ¥Û®x°|¤g¥x 
+#define NOBU_ITEM_3016		0x3435	// ¤sÅK¬â
+#define NOBU_ITEM_3017		0x3436	// ¬õ»ÈÄq 
+#define NOBU_ITEM_3018		0x3437	// ­ð¬z¬õ¤g 
+#define NOBU_ITEM_3019		0x3438	// ¶êÄtºÏÅKÄq 
+#define NOBU_ITEM_3020		0x3439	// »È¶Â 
+#define NOBU_ITEM_3021		0x343a	// ª¢¦â¤g 
+#define NOBU_ITEM_3022		0x3738	// ºÏÅKÄq 
+#define NOBU_ITEM_3023		0x3739	// ªd¬´¤g
+#define NOBU_ITEM_3024		0x498d	// ¤Wµì¥ØÂH¤g 
+#define NOBU_ITEM_3025		0x498e	// ¤W±s¼v¤g 
+#define NOBU_ITEM_3026		0x498f	// ¤W¶ÀÃu¤g 
+#define NOBU_ITEM_3027		0x4990	// ¤W¦ã¯ó¤g
+#define NOBU_ITEM_3028		0x4ea4	// ¤W¯^¥Û 
+#define NOBU_ITEM_3029		0x4ea5	// ¤W¯^¬â 
+#define NOBU_ITEM_3030		0x4ea6	// ¤W¨ª¥Ø¬âÅK 
+#define NOBU_ITEM_3031		0x4ea7	// ¤W¥Õ»È
 
 // ¨ä¥L
 #define NOBU_ITEM_9000		0x0223	// ³½¿|
 #define NOBU_ITEM_9001		0x0805	// ¦æ§õ¶º
 #define NOBU_ITEM_9002		0x34f6	// Ä_¥É­ì¥Û
 #define NOBU_ITEM_9003		0x480e	// ¤O¤§·½.¤j	
+#define NOBU_ITEM_9004		0x21de	// Åå²§¤W¯Å¬V®Æ
 #endif //#ifndef __NOBU_ITEMS_TABLE__
