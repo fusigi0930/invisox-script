@@ -157,7 +157,7 @@ int Nobu_MemPostDropProc() {
 	return 0;
 }
 
-int detectHDMemDigStatus() {
+int detectHDMemDigStatus(int *lastMP) {
 	unsigned char ar_chBuf[256];
 	if (IOC_onReadGameMemory(0, NOBU_MAX_MP_ADDR_HD, ar_chBuf, sizeof(ar_chBuf)) != 0) {
 		MRF_DebugMsg("detect hd memory dig stats get item memory failed\n");
@@ -168,27 +168,36 @@ int detectHDMemDigStatus() {
 	unsigned short nCurMP=*((unsigned short*) (ar_chBuf+(NOBU_CUR_MP_ADDR_HD-NOBU_MAX_MP_ADDR_HD)));
 	
 	//MRF_DebugMsg("maxMP: %d, curMP: %d\n", nMaxMP, nCurMP);
-	
+	if (nCurMP == *lastMP) {
+		return DIG_STATUS_FULL;
+	}
+	*lastMP=nCurMP;
 	if (nCurMP < 800) {
 		MRF_Delay(NORMAL_DELAY_TIME+5000);
 		IOC_onKeypress(VK_ESCAPE);
 		return DIG_STATUS_NO_MP;	
 	}
+	return DIG_STATUS_NORMAL;
 }
 
 int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) {
 	int nCount=0;
+	int nLastMP=0;
 
 	if (fnHDDropProc == NULL)
 		return -1;
 	
 	for (nCount=1; nCount <= nMaxLoop; nCount++) {
-		if (detectHDMemDigStatus() != DIG_STATUS_NO_MP) {
+		int nStatus=detectHDMemDigStatus(&nLastMP);
+		if (nStatus == DIG_STATUS_NORMAL) {
 			MRF_Delay(1800);
 			NobuDigProc();	
 			if ((nCount%3) != 0) {
 				continue;
 			}
+		}
+		else if (nStatus == DIG_STATUS_FULL) {
+			return 0;
 		}
 		MRF_Delay(15000);
 		Nobu_onKeypress(VK_RETURN, 5);
@@ -210,7 +219,10 @@ int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) 
 }
 
 int Nobu_HDmemDropMainProc(SHDNobuDrop *drops, SHDNobuItem *ptrItem) {
+	int nIndex=0;
 	while(1) {
+		bool isDroped=false;
+		
 		for (int i=0; drops[i].itemId != 0; i++) {
 			if (ptrItem->item.itemId == drops[i].itemId && 
 				ptrItem->item.itemType == NOBU_ITEMS_TYPE_HD_ITEM && 
@@ -219,9 +231,8 @@ int Nobu_HDmemDropMainProc(SHDNobuDrop *drops, SHDNobuItem *ptrItem) {
 				IOC_onKeypress(VK_RETURN);
 				MRF_Delay(400);
 				Nobu_DropItem();
-				MRF_Delay(200);
-				IOC_onKeypress('K');
-				MRF_Delay(300);
+				MRF_Delay(400);
+				isDroped=true;
 				break;
 			}
 		}
@@ -229,8 +240,15 @@ int Nobu_HDmemDropMainProc(SHDNobuDrop *drops, SHDNobuItem *ptrItem) {
 			Nobu_MemPostDropProc();
 			break;
 		}
-		Nobu_MemKeepItem();
+		if (!isDroped) {
+			Nobu_MemKeepItem();
+		}
+		else if (isDroped && nIndex==0) {
+			ptrItem--;
+		}
+		isDroped=false;
 		ptrItem--;
+		nIndex++;
 		MRF_Delay(400);
 	}
 }

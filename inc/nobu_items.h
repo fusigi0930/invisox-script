@@ -30,6 +30,22 @@
 #define NOBU_ITEM_0026		0x05bc	// 棉花
 #define NOBU_ITEM_0027		0x11b8	// 小庭院石
 #define NOBU_ITEM_0028		0x11bc	// 穗型飛石
+#define NOBU_ITEM_0029		0x343b	// 湧泉清水
+#define NOBU_ITEM_0030		0x343c	// 桑蠶的繭
+#define NOBU_ITEM_0031		0x343d	// 菊炭
+#define NOBU_ITEM_0032		0x343e	// 晨露的水滴
+#define NOBU_ITEM_0033		0x343f	// 伊達錦的蠶繭
+#define NOBU_ITEM_0034		0x3440	// 松炭
+#define NOBU_ITEM_0035		0x373a	// 熟蠶的繭層
+#define NOBU_ITEM_0036		0x373b	// 霜露的結晶
+#define NOBU_ITEM_0037		0x497f	// 上棉花
+#define NOBU_ITEM_0038		0x4980	// 上麻線
+#define NOBU_ITEM_0039		0x4981	// 上蠶絲
+#define NOBU_ITEM_0040		0x4982	// 上天蠶絲
+#define NOBU_ITEM_0041		0x4ea0	// 上黑漆
+#define NOBU_ITEM_0042		0x4ea1	// 上漆黑漆
+#define NOBU_ITEM_0043		0x4ea2	// 上靈水
+#define NOBU_ITEM_0044		0x4ea3	// 上神水
 
 // 採草類
 #define NOBU_ITEM_1000		0x11bb	// 角型飛石

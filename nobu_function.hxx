@@ -4,6 +4,8 @@
 #include ".\inc\v_key.h"
 
 #define DIG_STATUS_NO_MP		100
+#define DIG_STATUS_FULL			101
+#define DIG_STATUS_NORMAL		1
 
 void Nobu_DropItem();
 void Nobu_KeepItem();
