@@ -26,6 +26,9 @@ void DropProc(SHDNobuItem *ptrItem) {
 		{NOBU_ITEM_0026, 0},
 		{NOBU_ITEM_0027, 0},
 		{NOBU_ITEM_0028, 0},
+		{NOBU_ITEM_0014, 0},
+		{NOBU_ITEM_0015, 0},
+		{NOBU_ITEM_0016, 0},
 		{ 0, 0 },
 	};
 
