@@ -2,8 +2,11 @@
 #define __NOBU_ONLINE_MEM_FUNCTION__
 #include ".\nobu_function.hxx"
 
-#define NOBU_ITEMS_01_ADDR	0x978b40
-#define NOBU_ITEMS_OFFSET	0xcc
+#define NOBU_ITEMS_01_ADDR	0xa39544 //0xa3a65c
+#define NOBU_ITEMS_OFFSET	0xd0
+#define NOBU_MAX_MP_ADDR 0xa82530 // 0x200ea694
+#define NOBU_CUR_MP_ADDR 0xa82542 // 0x200ea698
+
 #define NOBU_ITEMS_01_ADDR_HD 0x138603B4//0x13861c1c
 #define NOBU_ITEMS_OFFSET_HD 0xd0
 #define NOBU_ITEMS_00_ADDR_HD (NOBU_ITEMS_01_ADDR_HD - NOBU_ITEMS_OFFSET_HD)
@@ -18,6 +21,7 @@
 
 #define NOBU_MAX_MP_ADDR_HD 0x138a93a0 // 0x200ea694
 #define NOBU_CUR_MP_ADDR_HD 0x138a93b2 // 0x200ea698
+
 
 struct SHDNobuItem {
 	union {
