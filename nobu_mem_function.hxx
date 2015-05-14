@@ -22,6 +22,8 @@
 #define NOBU_MAX_MP_ADDR_HD 0x138a93a0 // 0x200ea694
 #define NOBU_CUR_MP_ADDR_HD 0x138a93b2 // 0x200ea698
 
+#define TYPE_SD 100
+#define TYPE_HD 200
 
 struct SHDNobuItem {
 	union {
@@ -52,11 +54,9 @@ struct SNobuItem {
 
 typedef void (*fnDropProc)(SNobuItem *ptrItem);
 
-void Nobu_MemDropProc(fnDropProc dropProc);
 void Nobu_MemDropItem(unsigned char nNum);
 void Nobu_MemKeepItem();
 int Nobu_MemPostDropProc();
-int Nobu_GetItemMem(SNobuItem *ptrItems, int nLeng);
 int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *), int nMaxLoop);
 
 void Nobu_MemDropItem(unsigned char nNum) {
@@ -76,79 +76,11 @@ void Nobu_MemDropItem(unsigned char nNum) {
 	MRF_Delay(800);
 }
 
-void Nobu_MemDropProc(fnDropProc dropProc) {
-	Nobu_PreDropProc();
-	int nKeepItem1=0;
-	if (dropProc == 0) return;
-	
-	// Get item memory
-	SNobuItem items[50]={0};
-	int nItemIndex=Nobu_GetItemMem(items);
-	MRF_DebugMsg("itemcount: %d\n", nItemIndex);
-	int nUniItemCount=0;
-	while ((items[nItemIndex].dwItemIndex & 0xff) > 0x01) {
-		MRF_DebugMsg("ind: %x, index: 0x%04x, id: 0x%x, num: %d\n", nItemIndex, items[nItemIndex].dwItemIndex, items[nItemIndex].ddItemId, items[nItemIndex].dbNumber);
-		if ((items[nItemIndex].dwItemIndex & 0xff00) == 0x0000) {
-			nUniItemCount++;
-			if (nUniItemCount > 2)
-				break;
-			Nobu_MemKeepItem();
-			nItemIndex--;		
-			continue;
-		}
-		else {
-			nUniItemCount=0;
-		}
-		// drop item
-		dropProc(&items[nItemIndex]);
-		Nobu_MemKeepItem();
-		nItemIndex--;
-	}
-	Nobu_MemPostDropProc();
-}
-
 void Nobu_MemKeepItem() {
 	MRF_Delay(250);
 	IOC_onKeypress('I');
 	MRF_Delay(400);
 }
-
-int Nobu_GetItemMem(SNobuItem *ptrItems) {
-	unsigned char ar_chBuf[20480];
-	if (IOC_onReadGameMemory(0, NOBU_ITEMS_01_ADDR, ar_chBuf, sizeof(ar_chBuf)) != 0) {
-		MRF_DebugMsg("get item memor failed\n");
-		return;
-	}
-	
-	// Get the last item
-	SNobuItem *ptrCurItem=(SNobuItem*) ar_chBuf;
-	int nItemIndex=0;
-	MRF_DebugMsg("output the item info\n");
-	while (!((ptrCurItem->dwItemIndex & 0xff) == 0 || (ptrCurItem->dwItemIndex & 0xff) == 0xff)) {
-		/*
-		MRF_DebugMsg("item_id: 0x%x, item_ind: %04x, item_num:%d\n", 
-			ptrItem->ddItemId, ptrItem->dwItemIndex, ptrItem->dbNumber);
-		*/
-		memcpy(ptrItems+nItemIndex, ptrCurItem, sizeof(SNobuItem)); 
-		nItemIndex++;
-		ptrCurItem=(SNobuItem*) (ar_chBuf+(nItemIndex * NOBU_ITEMS_OFFSET));
-	}
-	return nItemIndex-1;
-}
-
-int NobuHD_GetItemMem(SHDNobuItem *ptrItems, int nLeng) {
-	unsigned char ar_chBuf[20480];
-	if (IOC_onReadGameMemory(0, NOBU_ITEMS_01_ADDR_HD, ar_chBuf, sizeof(ar_chBuf)) != 0) {
-		MRF_DebugMsg("get item memor failed\n");
-		return;
-	}
-	
-	// Get the last item
-	SHDNobuItem *ptrCurItem=(SHDNobuItem*) ar_chBuf;
-	memcpy (ptrItems, ar_chBuf, nLeng);
-	return 0;
-}
-
 
 int Nobu_MemPostDropProc() {
 	MRF_Delay(NORMAL_DELAY_TIME);
@@ -161,15 +93,36 @@ int Nobu_MemPostDropProc() {
 	return 0;
 }
 
-int detectHDMemDigStatus(int *lastMP) {
+int _Nobu_GetItemMem(SHDNobuItem *ptrItems, int nLeng, int addr) {
+	unsigned char ar_chBuf[20480];
+	if (IOC_onReadGameMemory(0, addr, ar_chBuf, sizeof(ar_chBuf)) != 0) {
+		MRF_DebugMsg("get item memor failed\n");
+		return;
+	}
+	
+	// Get the last item
+	SHDNobuItem *ptrCurItem=(SHDNobuItem*) ar_chBuf;
+	memcpy (ptrItems, ar_chBuf, nLeng);
+	return 0;
+}
+
+int Nobu_GetItemMem(SHDNobuItem *ptrItems, int nLeng) {
+	return _Nobu_GetItemMem(ptrItems, nLeng, NOBU_ITEMS_01_ADDR);
+}
+
+int NobuHD_GetItemMem(SHDNobuItem *ptrItems, int nLeng) {
+	return _Nobu_GetItemMem(ptrItems, nLeng, NOBU_ITEMS_01_ADDR_HD);
+}
+
+int _detectMemDigStatus(int *lastMP, int addrCur, int addrMax) {
 	unsigned char ar_chBuf[256];
-	if (IOC_onReadGameMemory(0, NOBU_MAX_MP_ADDR_HD, ar_chBuf, sizeof(ar_chBuf)) != 0) {
+	if (IOC_onReadGameMemory(0, addrMax, ar_chBuf, sizeof(ar_chBuf)) != 0) {
 		MRF_DebugMsg("detect hd memory dig stats get item memory failed\n");
 		return;
 	}
 	
-	unsigned short nMaxMP=*((unsigned short*) (ar_chBuf+(NOBU_MAX_MP_ADDR_HD-NOBU_MAX_MP_ADDR_HD)));
-	unsigned short nCurMP=*((unsigned short*) (ar_chBuf+(NOBU_CUR_MP_ADDR_HD-NOBU_MAX_MP_ADDR_HD)));
+	unsigned short nMaxMP=*((unsigned short*) (ar_chBuf+(addrMax-addrMax)));
+	unsigned short nCurMP=*((unsigned short*) (ar_chBuf+(addrCur-addrMax)));
 	
 	//MRF_DebugMsg("maxMP: %d, curMP: %d\n", nMaxMP, nCurMP);
 	if (nCurMP == *lastMP) {
@@ -184,7 +137,15 @@ int detectHDMemDigStatus(int *lastMP) {
 	return DIG_STATUS_NORMAL;
 }
 
-int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) {
+int detectMemDigStatus(int *lastMP) {
+	return _detectMemDigStatus(lastMP, NOBU_CUR_MP_ADDR, NOBU_MAX_MP_ADDR);
+}
+
+int detectHDMemDigStatus(int *lastMP) {
+	return _detectMemDigStatus(lastMP, NOBU_CUR_MP_ADDR_HD, NOBU_MAX_MP_ADDR_HD);
+}
+
+int _Nobu_MemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop, int nType) {
 	int nCount=0;
 	int nLastMP=0;
 
@@ -192,7 +153,13 @@ int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) 
 		return -1;
 	
 	for (nCount=1; nCount <= nMaxLoop; nCount++) {
-		int nStatus=detectHDMemDigStatus(&nLastMP);
+		int nStatus=0;
+		if (nType == TYPE_SD) {
+			nStatus=detectMemDigStatus(&nLastMP);
+		}
+		else if (nType == TYPE_HD) {
+			nStatus=detectHDMemDigStatus(&nLastMP);
+		}
 		if (nStatus == DIG_STATUS_NORMAL) {
 			MRF_Delay(1800);
 			NobuDigProc();	
@@ -209,7 +176,12 @@ int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) 
 		SHDNobuItem items[60]={0};
 		SHDNobuItem *ptrItem=items;
 		Nobu_PreDropProc();
-		NobuHD_GetItemMem(items, sizeof(items));
+		if (nType == TYPE_SD) {
+			Nobu_GetItemMem(items, sizeof(items));
+		}
+		else if (nType == TYPE_HD) {
+			NobuHD_GetItemMem(items, sizeof(items));
+		}		
 		while (ptrItem->item.itemIndex != 0xff) {
 			ptrItem++;
 		}
@@ -220,6 +192,14 @@ int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) 
 	
 	Nobu_LeaveGame();
 	return 0;
+}
+
+int Nobu_HDMemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) {
+	return _Nobu_MemDigging(fnHDDropProc, nMaxLoop, TYPE_HD);
+}
+
+int Nobu_MemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop) {
+	return _Nobu_MemDigging(fnHDDropProc, nMaxLoop, TYPE_SD);
 }
 
 int Nobu_HDmemDropMainProc(SHDNobuDrop *drops, SHDNobuItem *ptrItem) {
