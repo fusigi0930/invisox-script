@@ -142,13 +142,13 @@ void Nobu_LeaveGame() {
 	MRF_Delay(700);
 	IOC_onKeypress(VK_TAB);
 	MRF_Delay(500);
-	for (int i=0; i<10; i++) {
+	for (int i=0; i<6; i++) {
 		IOC_onKeypress('K');
 		MRF_Delay(100);
 	}
 	IOC_onKeypress(VK_RETURN);
 	MRF_Delay(700);
-	for (int i=0; i<7; i++) {
+	for (int i=0; i<6; i++) {
 		IOC_onKeypress('K');
 		MRF_Delay(100);
 	}	
