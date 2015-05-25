@@ -25,6 +25,11 @@
 #define TYPE_SD 100
 #define TYPE_HD 200
 
+#define NOBU_CURSOR_SELECT_NAME_ADDR_HD 0x17790d54 //0x2000b6bc
+#define NOBU_CURSOR_SELECT_STAT_ADDR_HD 0x17790C73
+#define NOBU_CURSOR_SELECT_STAT_HD 0x01 // selected
+#define NOBU_CURSOR_SELECT_STAT_HD 0x41 // not selected
+
 struct SHDNobuItem {
 	union {
 		unsigned char buffer[NOBU_ITEMS_OFFSET_HD];
@@ -168,7 +173,7 @@ int _Nobu_MemDigging(void (*fnHDDropProc)(SHDNobuItem *ptrItem), int nMaxLoop, i
 			}
 		}
 		else if (nStatus == DIG_STATUS_FULL) {
-			return 0;
+			break;
 		}
 		MRF_Delay(15000);
 		Nobu_onKeypress(VK_RETURN, 5);
