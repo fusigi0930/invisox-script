@@ -2,6 +2,15 @@
 #define __NOBU_ONLINE_FIGHT_FUNCTION__
 #include ".\nobu_function.hxx"
 
+
+#define FIGHT_ENEMY_NAME_ADDR 0xae16f0
+#define FIGHT_ENEMY_OFFSET 0xe4
+#define FIGHT_STATUS_ADDR 0xae1714
+#define FIGHT_STATUS_STANDBY 0x0000
+#define FIGHT_ENEMY_STATUS_ALIVE 0x0c
+#define FIGHT_ENEMY_STATUS_DEAD 0x14
+#define FIGHT_PROGRESS_ADDR 0xae1784
+
 enum ENStatus {
 	EN_STATUS_IDLE	=	0,
 	EN_STATUS_INPUT_CMD,
@@ -15,6 +24,7 @@ enum ENStatus {
 };
 
 int detectFightStatus();
+int detectFightStatus_mem();
 void fightingCmd(void (*fnFight) (int), int nRound);
 void runningStatusMachine(void (*fnFight) (int));
 
@@ -25,6 +35,54 @@ bool detectToIdle() {
 		return true;
 	}
 	return false;
+}
+
+bool detectToIdle_mem() {
+	unsigned char ar_chBuf[20];
+	if (IOC_onReadGameMemory(0, FIGHT_STATUS_ADDR, ar_chBuf, sizeof(ar_chBuf)) != 0) {
+		MRF_DebugMsg("get item memor failed\n");
+		return true;
+	}
+	unsigned short nFightStatus=*((unsigned short*)ar_chBuf);
+	if (nFightStatus == FIGHT_STATUS_STANDBY) {
+		return true;
+	}
+	return false;
+}
+
+int detectFightStatus_mem(int nStatus) {
+	//MRF_DebugMsg("find fight_quit\n");
+	if (detectToIdle_mem()) {
+		nStatus=EN_STATUS_IDLE;
+	}
+	switch(nStatus) {
+		case EN_STATUS_INFIGHT: 
+			if (MRF_MatchPic("nobu_pic\\fight_flag.bmp", &xCmd, &yCmd, 1024, 768)) {
+				//MRF_DebugMsg("still infight\n");
+				nStatus=EN_STATUS_INFIGHT;
+			}
+			else {
+				//MRF_DebugMsg("goto the get exp status\n");
+				nStatus=EN_STATUS_GET_EXP;
+			}
+			break;
+		case EN_STATUS_GET_EXP:
+			if (MRF_MatchPic("nobu_pic\\fight_list.bmp", &xCmd, &yCmd, 1024, 768)) {
+				nSatatus=EN_STATUS_ITEM_LIST;
+			}
+			//else if (detectToIdle()) {
+			//	nSatatus=EN_STATUS_IDLE;
+			//}
+		case EN_STATUS_ITEM_LIST:
+			IOC_onMouseMove(800, 600);
+			break;
+		default:
+			if (MRF_MatchPic("nobu_pic\\fight_flag.bmp", &xCmd, &yCmd, 1024, 768)) {
+				nStatus=EN_STATUS_INFIGHT;
+			}			
+			break;				
+	}
+	return nStatus;
 }
 
 int detectFightStatus(int nStatus) {
