@@ -11,6 +11,22 @@
 #define FIGHT_ENEMY_STATUS_DEAD 0x14
 #define FIGHT_PROGRESS_ADDR 0xae1784
 
+#define FIGHT_MEMBER_NAME_ADDR 0xae9a8a
+
+struct SEnemy {
+	unsigned short wszFirstName[4];
+	unsigned char arRes1[10];
+	unsigned short wszLastName[4];
+	unsigned char arRes2[10];
+	unsigned long nFightStatus;
+	unsigned short nAlive;
+	unsigned char arRes4[0x6a];
+	unsigned short nSkill1[3];
+	unsigned char arRes5[2];
+	unsigned short nSkill2[3];
+	unsigned char arRes6[0x3c];
+};
+
 enum ENStatus {
 	EN_STATUS_IDLE	=	0,
 	EN_STATUS_INPUT_CMD,
