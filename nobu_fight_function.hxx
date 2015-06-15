@@ -53,51 +53,54 @@ bool detectToIdle() {
 	return false;
 }
 
-bool detectToIdle_mem() {
-	unsigned char ar_chBuf[20];
-	if (IOC_onReadGameMemory(0, FIGHT_STATUS_ADDR, ar_chBuf, sizeof(ar_chBuf)) != 0) {
-		MRF_DebugMsg("get item memor failed\n");
+bool detectToIdle_mem(unsigned char *ptr ) {
+	SEnemy *ptrEnemy=(SEnemy *)ptr;
+	if (ptrEnemy->nFightStatus == FIGHT_STATUS_STANDBY) {
 		return true;
-	}
-	unsigned short nFightStatus=*((unsigned short*)ar_chBuf);
-	if (nFightStatus == FIGHT_STATUS_STANDBY) {
-		return true;
-	}
+	}	
+	
 	return false;
 }
 
-int detectFightStatus_mem(int nStatus) {
-	//MRF_DebugMsg("find fight_quit\n");
-	if (detectToIdle_mem()) {
-		nStatus=EN_STATUS_IDLE;
+int detectFightStatus_mem(int nStatus, unsigned char *ptr) {
+	if (detectToIdle_mem(ptr)) {
+		return EN_STATUS_IDLE;
 	}
+	
+	unsigned char *ptrDetect=ptr;
+
+	SEnemy *ptrEnemy=(SEnemy *)ptrDetect;	
+	int i=0;
+	for (i=0; i<7; i++) {
+		if (ptrEnemy->nAlive == FIGHT_ENEMY_STATUS_ALIVE) {
+			break;
+		}
+		ptrDetect+=FIGHT_ENEMY_OFFSET;
+		ptrEnemy=(SEnemy *)ptrDetect;
+	}	
+	if (i >= 7) {
+		nStatus=EN_STATUS_GET_EXP;
+	}
+	else {
+		nStatus=EN_STATUS_INFIGHT;
+	}
+
+
 	switch(nStatus) {
 		case EN_STATUS_INFIGHT: 
-			if (MRF_MatchPic("nobu_pic\\fight_flag.bmp", &xCmd, &yCmd, 1024, 768)) {
-				//MRF_DebugMsg("still infight\n");
-				nStatus=EN_STATUS_INFIGHT;
-			}
-			else {
-				//MRF_DebugMsg("goto the get exp status\n");
-				nStatus=EN_STATUS_GET_EXP;
-			}
+
 			break;
 		case EN_STATUS_GET_EXP:
-			if (MRF_MatchPic("nobu_pic\\fight_list.bmp", &xCmd, &yCmd, 1024, 768)) {
-				nSatatus=EN_STATUS_ITEM_LIST;
-			}
-			//else if (detectToIdle()) {
-			//	nSatatus=EN_STATUS_IDLE;
-			//}
+
+			break;
 		case EN_STATUS_ITEM_LIST:
-			IOC_onMouseMove(800, 600);
+
 			break;
 		default:
-			if (MRF_MatchPic("nobu_pic\\fight_flag.bmp", &xCmd, &yCmd, 1024, 768)) {
-				nStatus=EN_STATUS_INFIGHT;
-			}			
+		
 			break;				
 	}
+	
 	return nStatus;
 }
 
@@ -160,6 +163,57 @@ void moveFindNpc() {
 	MRF_Delay(200);
 	IOC_onKeypress(VK_RETURN);
 	MRF_Delay(700);
+}
+
+void runningStatusMachine_mem(void (*fnFight) (int)) {
+	int nStatus=EN_STATUS_IDLE;
+	int nRound=0;
+	while (1) {
+		unsigned char ar_chBuf[2048];
+		if (IOC_onReadGameMemory(0, FIGHT_ENEMY_NAME_ADDR, ar_chBuf, sizeof(ar_chBuf)) != 0) {
+			MRF_DebugMsg("get item memor failed\n");
+			MRF_Delay(200);
+			continue;
+		}		
+		nStatus=detectFightStatus_mem(nStatus, ar_chBuf);
+		//MRF_DebugMsg("the status is: %d, %d\n", nStatus, EN_STATUS_INPUT_CMD);
+		switch (nStatus) {
+			case EN_STATUS_IDLE:
+				//IOC_onMouseMove(100, 600);
+				moveFindNpc();
+				break;
+			case EN_STATUS_INFIGHT:
+				//IOC_onMouseMove(200, 600);
+				break;
+			case EN_STATUS_INPUT_CMD:
+				//MRF_DebugMsg("EN_STATUS_INPUT_CMD: 0x%x\n", fnFight);
+				//IOC_onMouseMove(300, 600);
+				fightingCmd(fnFight, nRound);
+				break;
+			case EN_STATUS_GET_EXP:
+				//IOC_onMouseMove(400, 600);
+				MRF_Delay(100);
+				IOC_onKeypress(VK_RETURN);
+				break;
+			case EN_STATUS_ITEM_LIST:	
+				MRF_Delay(350);
+				//IOC_onMouseMove(500, 600);
+				IOC_onKeypress(VK_RETURN);	
+				break;
+			case EN_STATUS_SELECT_ITEMS:
+				MRF_Delay(250);
+				IOC_onKeypress('I');	
+				MRF_Delay(350);
+				IOC_onKeypress(VK_RETURN);	
+				break;
+			case EN_STATUS_QUIT:
+				//IOC_onMouseMove(600, 600);
+				nRound=0;
+				break;
+		}
+		MRF_Delay(100);
+	}
+	//IOC_onMouseMove(500, 700);
 }
 
 void runningStatusMachine(void (*fnFight) (int)) {
