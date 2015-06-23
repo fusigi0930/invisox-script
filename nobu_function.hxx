@@ -1,6 +1,6 @@
 #ifndef __NOBU_ONLINE_FUNCTION__
 #define __NOBU_ONLINE_FUNCTION__
-#define NORMAL_DELAY_TIME 400
+#define NORMAL_DELAY_TIME 500
 #include ".\inc\v_key.h"
 
 #define DIG_STATUS_NO_MP		100
@@ -28,9 +28,9 @@ void Nobu_DropItem() {
 	IOC_onKeypress('J');
 	MRF_Delay(300);
 	IOC_onKeypress(VK_RETURN);
-	MRF_Delay(800);
+	MRF_Delay(900);
 	IOC_onKeypress('I');
-	MRF_Delay(300);
+	MRF_Delay(450);
 }
 
 void Nobu_KeepItem() {

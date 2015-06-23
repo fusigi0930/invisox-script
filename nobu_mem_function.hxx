@@ -7,7 +7,7 @@
 #define NOBU_MAX_MP_ADDR 0xa866f4 // 0x200ea694
 #define NOBU_CUR_MP_ADDR 0xa86706 // 0x200ea698
 
-#define NOBU_ITEMS_01_ADDR_HD 0x138603B4//0x13861c1c
+#define NOBU_ITEMS_01_ADDR_HD 0x14c403b4//0x15A403B4//0x13861c1c
 #define NOBU_ITEMS_OFFSET_HD 0xd0
 #define NOBU_ITEMS_00_ADDR_HD (NOBU_ITEMS_01_ADDR_HD - NOBU_ITEMS_OFFSET_HD)
 #define NOBU_ITEMS_PROTECT_HD 0xbf
@@ -19,8 +19,8 @@
 
 #define NOBU_ITEMS_TYPE_HD_ITEM 1
 
-#define NOBU_MAX_MP_ADDR_HD 0x138a93a4 // 0x200ea694
-#define NOBU_CUR_MP_ADDR_HD 0x138a93b6 // 0x200ea698
+#define NOBU_MAX_MP_ADDR_HD 0x14c893a4 // 0x15A893a4
+#define NOBU_CUR_MP_ADDR_HD 0x14c893b6 // 0x15A893b6
 
 #define TYPE_SD 100
 #define TYPE_HD 200
@@ -30,6 +30,8 @@
 #define NOBU_CURSOR_SELECT_STAT_HD 0x01 // selected
 #define NOBU_CURSOR_SELECT_STAT_HD 0x41 // not selected
 
+#define NOBU_CURSOR_SELECT_NAME_ADDR 0x1dd617ec
+#define NOBU_CURSOR_SELECT_STAT_ADDR 0x1dd61713
 struct SHDNobuItem {
 	union {
 		unsigned char buffer[NOBU_ITEMS_OFFSET_HD];
@@ -68,7 +70,7 @@ void Nobu_MemDropItem(unsigned char nNum) {
 	//MRF_DebugMsg("memDropItem drop item\n");
 	if (nNum > 1) {
 		IOC_onKeypress(VK_RETURN);
-		MRF_Delay(800);
+		MRF_Delay(900);
 	}
 	else {
 		return;
@@ -78,7 +80,7 @@ void Nobu_MemDropItem(unsigned char nNum) {
 	IOC_onKeypress('J');
 	MRF_Delay(400);
 	IOC_onKeypress(VK_RETURN);
-	MRF_Delay(800);
+	MRF_Delay(900);
 }
 
 void Nobu_MemKeepItem() {
@@ -129,7 +131,7 @@ int _detectMemDigStatus(int *lastMP, int addrCur, int addrMax) {
 	unsigned short nMaxMP=*((unsigned short*) (ar_chBuf+(addrMax-addrMax)));
 	unsigned short nCurMP=*((unsigned short*) (ar_chBuf+(addrCur-addrMax)));
 	
-	//MRF_DebugMsg("maxMP: %d, curMP: %d\n", nMaxMP, nCurMP);
+	MRF_DebugMsg("maxMP: %d, curMP: %d\n", nMaxMP, nCurMP);
 	if (nCurMP == *lastMP) {
 		return DIG_STATUS_FULL;
 	}
