@@ -3,13 +3,13 @@
 #include ".\nobu_function.hxx"
 
 
-#define FIGHT_ENEMY_NAME_ADDR 0xae16f0
+#define FIGHT_ENEMY_NAME_ADDR 0xaed668 //0xae16f0
 #define FIGHT_ENEMY_OFFSET 0xe4
-#define FIGHT_STATUS_ADDR 0xae1714
+#define FIGHT_STATUS_ADDR 0xaed68c //0xae1714
 #define FIGHT_STATUS_STANDBY 0x0000
 #define FIGHT_ENEMY_STATUS_ALIVE 0x0c
 #define FIGHT_ENEMY_STATUS_DEAD 0x14
-#define FIGHT_PROGRESS_ADDR 0xae1784
+#define FIGHT_PROGRESS_ADDR 0xaed6fc //0xae1784
 
 #define FIGHT_MEMBER_NAME_ADDR 0xae9a8a
 
@@ -211,7 +211,7 @@ void runningStatusMachine_mem(void (*fnFight) (int)) {
 				nRound=0;
 				break;
 		}
-		MRF_Delay(100);
+		MRF_Delay(70);
 	}
 	//IOC_onMouseMove(500, 700);
 }

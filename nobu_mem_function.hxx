@@ -2,10 +2,10 @@
 #define __NOBU_ONLINE_MEM_FUNCTION__
 #include ".\nobu_function.hxx"
 
-#define NOBU_ITEMS_01_ADDR	0xa3d704 //0xa3a65c
+#define NOBU_ITEMS_01_ADDR	0xa49c04 //0xa3d704 //0xa3a65c
 #define NOBU_ITEMS_OFFSET	0xd0
-#define NOBU_MAX_MP_ADDR 0xa866f4 // 0x200ea694
-#define NOBU_CUR_MP_ADDR 0xa86706 // 0x200ea698
+#define NOBU_MAX_MP_ADDR 0xa92c00 //0xa866f4 // 0x200ea694
+#define NOBU_CUR_MP_ADDR 0xa92c12 //0xa86706 // 0x200ea698
 
 #define NOBU_ITEMS_01_ADDR_HD 0x14c403b4//0x15A403B4//0x13861c1c
 #define NOBU_ITEMS_OFFSET_HD 0xd0
